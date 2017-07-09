@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, render_template
+from flask import Flask, request, redirect, render_template, session
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -6,6 +6,7 @@ app.config['DEBUG'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:blogz123@localhost:8889/blogz'
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
+app.secret_key = 'abu123hayat'
 
 
 class Blog(db.Model):
@@ -18,6 +19,84 @@ class Blog(db.Model):
     def __init__(self, title, content):
         self.title = title
         self.content = content
+
+class User(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True)
+    password = db.Column(db.String(120))
+
+    def __init__(self, email, password):
+        self.email = email
+        self.password = password
+
+
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+    if request.method == 'POST':
+
+        user_email=request.form['email']
+        password=request.form['password']
+
+        verify_user = User.query.filter_by(email=user_email).first()
+
+        if verify_user != None and verify_user.password == password: # verify_user.password retrieves the password word in out database and we compare it to password from user
+            session['email']= user_email
+            return redirect('/')
+        else:
+            #TODO - explain why login failed
+            pass
+
+    return render_template('login.html')
+@app.before_request #runs at the begining of every request and check for the email in the dict., if its not there and directs them to log in
+def require_login():
+    allowed_routes =['login', 'signup']
+    if request.endpoint not in allowed_routes and 'email' not in session:
+        return redirect('/login')
+
+
+@app.route('/signup', methods=['POST', 'GET'])
+def signup():
+    if request.method == 'POST':
+        user_email=request.form['email']
+        password=request.form['password']
+        verify=request.form['verify']
+
+        email_error =""
+        verify_error=""
+        user_email_error=""
+
+        if len(user_email)>=20 or len(user_email)==0:
+            email_error="Please enter valid eamil"
+            return email_error
+
+        if password != verify:
+            verify_error = "password dont match"
+            return verify_error
+
+        if len(email_error)>0: # if we have multiple error messages, this is saying if any of them are true. alt. if email_error:
+            return "Test"
+
+        verify_user = User.query.filter_by(email=user_email).first()
+        if verify_user == None: # checks if input email is in the database and if not present returns none
+            #TODO signup/register user_email
+            new_user = User(user_email, password)
+            db.session.add(new_user)
+            db.session.commit()
+
+            #TODO Remember the user
+            session['email']=user_email
+
+            return redirect('/')
+        else:
+            user_email_error="email already in use"
+
+    return render_template('signup.html')
+
+@app.route('/logout')
+def logout():
+    del session['email']
+    return redirect('/')
 
 
 @app.route('/', methods=['POST', 'GET'])
