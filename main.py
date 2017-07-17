@@ -1,5 +1,6 @@
 from flask import Flask, request, redirect, render_template, session
 from flask_sqlalchemy import SQLAlchemy
+# colab with Osman Abate
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
