@@ -14,17 +14,20 @@ class Blog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120))
     content = db.Column(db.String(1000))
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 
-    def __init__(self, title, content):
+    def __init__(self, title, content, owner):
         self.title = title
         self.content = content
+        self.owner = owner
 
 class User(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True)
     password = db.Column(db.String(120))
+    posts = db.relationship('Blog', backref='owner')
 
     def __init__(self, email, password):
         self.email = email
@@ -102,6 +105,8 @@ def logout():
 @app.route('/', methods=['POST', 'GET'])
 def index():
 
+    owner = User.query.filter_by(email=session['email']).first()
+
     if request.method == 'POST':
         error_title=""
         error_content=""
@@ -116,24 +121,33 @@ def index():
         if len(error_title)>0 or len(error_content)>0:
             return render_template('index.html',page_name="Build a Blog!", title=blog_title, content= blog_content, error_title=error_title, error_content=error_content)
         else:
-            new_task = Blog(blog_title, blog_content)
-            db.session.add(new_task)
+            new_post = Blog(blog_title, blog_content, owner)
+            db.session.add(new_post)
             db.session.commit()
-            return redirect("/mainpage?id="+str(new_task.id))
+            return redirect("/mainpage?id="+str(new_post.id))
 
-    posts = Blog.query.all()
+    posts = Blog.query.filter_by(owner=owner).all()
     return render_template('index.html',page_name="Add a Blog Entry", posts=posts)
 
 
 @app.route('/mainpage', methods=['GET'])
 def add():
     blog_id = request.args.get('id')
-    if blog_id==None:
-        posts = Blog.query.all()
-        return render_template('mainpage.html', page_name="Build A Blog", posts=posts)
+    blog_user = request.args.get('email')
+
+    if blog_id:
+        post = Blog.query.filter_by(id=blog_id).first()
+        return render_template('singleblog.html', page_name="Build A Blog", post=post)
+
+    elif blog_user:
+        user_id = User.query.filter_by(email=blog_user).first().id
+        posts = Blog.query.filter_by(owner_id=user_id).all()
+        return render_template('mainpage.html', posts=posts)
+        #return "Hello"
+
     else:
-        singl_post= Blog.query.filter_by(id=blog_id).first()
-        return render_template('singleblog.html', post=singl_post)
+        users= User.query.all()
+        return render_template('userlist.html', page_name = "blog users!", users=users)
 
 
 if __name__ == '__main__':

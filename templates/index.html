@@ -11,17 +11,17 @@
                 border-radius: 10px;" method='post'>
         <label>
             Title for your new blog:
-            <input type="text" name='title' />
-        </label>{{error_title}}<br>
+            <input type="text" name='title' />{{error_title}}
+        </label>
+        <br>
         <br>
         <br>
         <label>Your new blog:
             <textarea name='content' style='margin: 10px 0;
-                width: 540px;
+                width: 500px;
                 height: 120px;'>{{content}}</textarea> {{error_content}}
         </label>
         <input type="submit" value="Add Entry" />
     </form>
-
 
 {% endblock %}
