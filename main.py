@@ -128,7 +128,7 @@ def index():
             return redirect("/mainpage?id="+str(new_post.id))
 
     posts = Blog.query.filter_by(owner=owner).all()
-    return render_template('index.html',page_name="Add a Blog Entry", posts=posts)
+    return render_template('newpost.html',page_name="Add a Blog Entry", posts=posts)
 
 
 @app.route('/mainpage', methods=['GET'])
@@ -150,6 +150,16 @@ def add():
         users= User.query.all()
         return render_template('userlist.html', page_name = "blog users!", users=users)
 
+@app.route('/index', methods=['GET'])
+def test():
+    blog_id = request.args.get('id')
+    if blog_id==None:
+        posts = Blog.query.all()
+        return render_template('index.html', page_name="Blog Posts!", posts=posts)
+    
+    else:
+        singl_post= Blog.query.filter_by(id=blog_id).first()
+        return render_template('singleblog.html', post=singl_post)
 
 if __name__ == '__main__':
     app.run()

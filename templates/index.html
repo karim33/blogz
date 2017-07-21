@@ -1,27 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1 style= "text-align:center;"> {{page_name}}</h1>
-    <form style="
-                background-color: #eee;
-                padding: 20px;
-                margin: 0 auto;
-                width: 540px;
-                font: 16px sans-serif;
-                border-radius: 10px;" method='post'>
-        <label>
-            Title for your new blog:
-            <input type="text" name='title' />{{error_title}}
-        </label>
-        <br>
-        <br>
-        <br>
-        <label>Your new blog:
-            <textarea name='content' style='margin: 10px 0;
-                width: 500px;
-                height: 120px;'>{{content}}</textarea> {{error_content}}
-        </label>
-        <input type="submit" value="Add Entry" />
-    </form>
+<h1 style= "text-align:center;"> {{page_name}}</h1>
+<ul>
+    {% for post in posts %}
+    <a href="/index?id={{post.id}}">{{post.title}}</a>
+    <p>{{post.content}}</P>
 
+    <p>Written by: <a href="/index?email={{post.email}}">{{post.email}}</a></p>
+
+    {% endfor %}
+</ul>
 {% endblock %}
