@@ -7,7 +7,7 @@
     <a href="/index?id={{post.id}}">{{post.title}}</a>
     <p>{{post.content}}</P>
 
-    <p>Written by: <a href="/index?email={{post.email}}">{{post.email}}</a></p>
+    <p>Written by: <a href="/index?id={{post.id}}">{{post.owner.email}}</a></p>
 
     {% endfor %}
 </ul>

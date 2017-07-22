@@ -156,7 +156,7 @@ def test():
     if blog_id==None:
         posts = Blog.query.all()
         return render_template('index.html', page_name="Blog Posts!", posts=posts)
-    
+
     else:
         singl_post= Blog.query.filter_by(id=blog_id).first()
         return render_template('singleblog.html', post=singl_post)
